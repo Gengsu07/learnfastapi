@@ -1,3 +1,5 @@
 uvicorn[standard]
 fastapi
-sqlalchemy
+sqlmodel
+sqlacodegen
+#sqlacodegen --generator sqlmodels sqlite:///database.db

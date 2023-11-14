@@ -1,14 +1,42 @@
 from typing import Optional
 
-from fastapi import FastAPI
-
-from api.data import get_data
-from api.models.blog import PostIn
+from database import get_session
+from fastapi import Depends, FastAPI
+from models import MPN
+from sqlmodel import Session, select
 
 app = FastAPI()
 
-data = get_data()
-post = {}
+data = [
+    {
+        "KDMAP": "411111",
+        "KDBAYAR": "100",
+        "NM_KATEGORI": "AKTIVITAS PENYEWAAN DAN SEWA GUNA USAHA TANPA HAK OPSI, KETENAGAKERJAAN, AGEN PERJALANAN DAN PENUNJANG USAHA LAINNYA",
+        "DATEBAYAR": "2023-03-21",
+        "NOMINAL": -808478.0,
+    },
+    {
+        "KDMAP": "411111",
+        "KDBAYAR": "100",
+        "NM_KATEGORI": "AKTIVITAS PENYEWAAN DAN SEWA GUNA USAHA TANPA HAK OPSI, KETENAGAKERJAAN, AGEN PERJALANAN DAN PENUNJANG USAHA LAINNYA",
+        "DATEBAYAR": "2023-07-05",
+        "NOMINAL": -1801666.0,
+    },
+    {
+        "KDMAP": "411111",
+        "KDBAYAR": "100",
+        "NM_KATEGORI": "AKTIVITAS PENYEWAAN DAN SEWA GUNA USAHA TANPA HAK OPSI, KETENAGAKERJAAN, AGEN PERJALANAN DAN PENUNJANG USAHA LAINNYA",
+        "DATEBAYAR": "2023-07-20",
+        "NOMINAL": -900833.0,
+    },
+    {
+        "KDMAP": "411111",
+        "KDBAYAR": "100",
+        "NM_KATEGORI": "INDUSTRI PENGOLAHAN",
+        "DATEBAYAR": "2023-05-03",
+        "NOMINAL": -6050000.0,
+    },
+]
 
 
 @app.get("/")
@@ -45,8 +73,8 @@ async def get_post_query(
     return data_queryed
 
 
-@app.post("/blog")
-async def create_post(
-    data: PostIn,
-):
-    return {"data": f"post has been created with title: {data.title}"}
+@app.get("/mpn", response_model=list[MPN])
+async def get_mpn(session: Session = Depends(get_session)):
+    statement = select(MPN)
+    data = session.exec(statement).all()
+    return data

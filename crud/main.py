@@ -1,9 +1,8 @@
-import models
-from database import SessionLocal, engine
 from fastapi import Depends, FastAPI
-from models import Issue
-from schemas import IssueIn
 from sqlalchemy.orm import Session
+
+from crud import models, schemas
+from crud.database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -18,10 +17,11 @@ def get_db():
         db.close()
 
 
-@app.post("/issue", status_code=201)
-def create_issue(issue=IssueIn, db: Session = Depends(get_db)):
-    newissue = Issue(title=issue.title, description=issue.description)
-    db.add(newissue)
-    db.commit()
-    db.refresh(newissue)
-    return newissue
+@app.post("/issue", status_code=201, response_model=schemas.IssueBase)
+def create_issue(issue=schemas.IssueIn, db: Session = Depends(get_db)):
+    # issue_id = Issue(**issue.dict(), createdAt=datetime.now())
+    # newissue = Issue(id=issue_id + 1, title=issue.title, description=issue.description)
+    # db.add(newissue)
+    # db.commit()
+    # db.refresh(newissue)
+    return "ok"

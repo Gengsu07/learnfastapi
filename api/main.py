@@ -1,10 +1,13 @@
 from typing import Optional
 
-from database import get_session
+import models
+from database import SessionLocal, engine
 from fastapi import Depends, FastAPI
 from models import MPN
-from sqlmodel import Session, select
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
+models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 data = [
@@ -37,6 +40,14 @@ data = [
         "NOMINAL": -6050000.0,
     },
 ]
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 @app.get("/")
@@ -73,8 +84,8 @@ async def get_post_query(
     return data_queryed
 
 
-@app.get("/mpn", response_model=list[MPN])
-async def get_mpn(session: Session = Depends(get_session)):
+@app.get("/mpn")
+async def get_mpn(db: Session = Depends(get_db)):
     statement = select(MPN)
-    data = session.exec(statement).all()
+    data = db.execute(statement).all()
     return data

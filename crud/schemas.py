@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from pydantic import BaseModel
 
 
@@ -10,7 +8,6 @@ class IssueIn(BaseModel):
 
 class IssueBase(IssueIn):
     id: int
-    createdAt: datetime
 
     class Config:
-        orm = True
+        orm_mode = True

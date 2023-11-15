@@ -1,9 +1,10 @@
-from typing import Optional
+from typing import List, Optional
 
 import models
 from database import SessionLocal, engine
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 from models import MPN
+from schemas import MPN_DATA
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -84,8 +85,40 @@ async def get_post_query(
     return data_queryed
 
 
-@app.get("/mpn")
+@app.get("/mpn", response_model=List[MPN_DATA], status_code=200)
 async def get_mpn(db: Session = Depends(get_db)):
-    statement = select(MPN)
-    data = db.execute(statement).all()
+    statement = select(MPN).limit(10)
+    data = db.execute(statement).scalars().all()
+    if not data:
+        raise HTTPException(status_code=404, detail="Data Tidak Ditemukan")
+    return data
+
+
+@app.get("/kdmap/{kdmap}", response_model=List[MPN_DATA])
+async def get_kdmap(kdmap: str, db: Session = Depends(get_db)):
+    stmt = select(MPN).where(MPN.kdmap == kdmap)
+    data = db.execute(stmt).scalars().all()
+    return data
+
+
+@app.get("/mpn/search", response_model=List[MPN_DATA])
+async def search_mpn(
+    db: Session = Depends(get_db),
+    kdmap: Optional[str] = None,
+    kdbayar: Optional[str] = None,
+    sektor: Optional[str] = None,
+):
+    stmt = select(MPN)
+    if kdmap:
+        stmt = stmt.filter(MPN.kdmap == kdmap)
+    if kdbayar:
+        stmt = stmt.filter(MPN.kdbayar == kdbayar)
+    if sektor:
+        stmt = stmt.filter(MPN.kd_kategori == sektor)
+
+    data = db.execute(stmt).scalars().all()
+    if not data:
+        raise HTTPException(
+            status_code=404, detail=f"Data {kdmap ,kdbayar, sektor} Tidak Ditemukan"
+        )
     return data

@@ -15,3 +15,17 @@ class IssueBase(IssueIn):
 
     class Config:
         orm_mode = True
+
+
+class UserIn(BaseModel):
+    username: str
+    email: Optional[str]
+    password: str
+
+
+class UserBase(UserIn):
+    id: int
+    createdAt: Optional[datetime]
+
+    class Config:
+        orm_mode = True

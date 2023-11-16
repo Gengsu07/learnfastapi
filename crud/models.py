@@ -11,3 +11,12 @@ class Issue(Base):
     title = Column(String)
     description = Column(String)
     createdAt = Column(DateTime, default=datetime.now())
+
+
+class User(Base):
+    __tablename__ = "user"
+    id = Column(Integer, primary_key=True)
+    username = Column(String)
+    email = Column(String)
+    password = Column(String)
+    createdAt = Column(DateTime, default=datetime.now())

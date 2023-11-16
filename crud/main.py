@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from crud import models, schemas
@@ -63,4 +64,35 @@ async def del_issue(issueid: int, db: Session = Depends(get_db)):
     )
     # del_stmt = delete(models.Issue).where(models.Issue.id == issueid)
     # db.execute(del_stmt)
+    db.commit()
     return {"Detail": f"Data with id:{issueid} has been deleted"}
+
+
+@app.put("/issue/{issueid}", status_code=202)
+async def update_issue(
+    issueid: int, request: schemas.IssueIn, db: Session = Depends(get_db)
+):
+    stmt = db.query(models.Issue).filter(models.Issue.id == issueid).first()
+    if not stmt:
+        raise HTTPException(
+            status_code=404, detail=f"Issue with id:{issueid} is not available"
+        )
+    stmt_update = (
+        update(models.Issue)
+        .where(models.Issue.id == issueid)
+        .values(title=request.title, description=request.description)
+    )
+    db.execute(stmt_update)
+    db.commit()
+    return "updated"
+
+
+@app.post("/user", status_code=201, response_model=schemas.UserBase)
+async def create_user(request: schemas.UserIn, db: Session = Depends(get_db)):
+    newuser = models.User(
+        username=request.username, email=request.email, password=request.password
+    )
+    db.add(newuser)
+    db.commit()
+    db.refresh(newuser)
+    return newuser

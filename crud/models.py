@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String
+from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Integer, String
 
 from .database import Base
 
@@ -8,3 +10,4 @@ class Issue(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     description = Column(String)
+    createdAt = Column(DateTime, default=datetime.now())

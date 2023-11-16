@@ -2,7 +2,6 @@ from fastapi import Depends, FastAPI
 from sqlalchemy.orm import Session
 
 from crud import models, schemas
-from crud.crud import create_new_issue
 from crud.database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
@@ -19,11 +18,14 @@ async def get_db():
 
 
 @app.post("/issue", status_code=201)
-async def create_issue(issue=schemas.IssueIn, db: Session = Depends(get_db)):
-    newissue = create_new_issue(db, issue)
-    # issue_id = Issue(**issue.dict(), createdAt=datetime.now())
-    # newissue = Issue(id=issue_id + 1, title=issue.title, description=issue.description)
-    # db.add(newissue)
-    # db.commit()
-    # db.refresh(newissue)
-    return schemas.IssueBase.from_orm(newissue)
+async def create_issue(issue: schemas.IssueIn, db: Session = Depends(get_db)):
+    # newissue = create_new_issue(db, issue)
+    newissue = models.Issue(title=issue.title, description=issue.description)
+
+    # Add the new issue to the database
+    db.add(newissue)
+    db.commit()
+
+    # Refresh the session to ensure we have the latest data (including the generated ID)
+    db.refresh(newissue)
+    return newissue

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -10,7 +11,7 @@ class IssueIn(BaseModel):
 
 class IssueBase(IssueIn):
     id: int
-    createdAt: datetime
+    createdAt: Optional[datetime]
 
     class Config:
         orm_mode = True

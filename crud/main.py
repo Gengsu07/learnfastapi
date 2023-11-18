@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import Depends, FastAPI, HTTPException
+from hashing import PassHash
 from sqlalchemy import update
 from sqlalchemy.orm import Session
 
@@ -89,10 +90,41 @@ async def update_issue(
 
 @app.post("/user", status_code=201, response_model=schemas.UserBase)
 async def create_user(request: schemas.UserIn, db: Session = Depends(get_db)):
+    cekusername = (
+        db.query(models.User).filter(models.User.username == request.username).first()
+    )
+    if cekusername:
+        raise HTTPException(
+            status_code=409,
+            detail=f"User with username:{request.username} already exist",
+        )
+
     newuser = models.User(
-        username=request.username, email=request.email, password=request.password
+        username=request.username,
+        email=request.email,
+        password=PassHash.hash(request.password),
     )
     db.add(newuser)
     db.commit()
     db.refresh(newuser)
     return newuser
+
+
+@app.get("/user", status_code=200, response_model=List[schemas.UserBase])
+async def get_user(db: Session = Depends(get_db)):
+    stmt = db.query(models.User).all()
+    return [schemas.UserBase.from_orm(x) for x in stmt]
+
+
+@app.delete("/user/{userid}", status_code=204)
+async def del_user(userid: int, db: Session = Depends(get_db)):
+    stmt = db.query(models.User).filter(models.User.id == userid).first()
+    if not stmt:
+        raise HTTPException(
+            status_code=404, detail=f"User with id:{userid} is not available"
+        )
+    db.query(models.User).filter(models.User.id == userid).delete(
+        synchronize_session=False
+    )
+    db.commit()
+    return {"detail": f"User id:{userid} has been deleted"}

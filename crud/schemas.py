@@ -20,8 +20,10 @@ class UserIn(BaseModel):
 
 class UserBase(UserIn):
     id: int
-    user_id: int
     createdAt: Optional[datetime]
+
+    class Config:
+        orm_mode = True
 
 
 class UserMini(BaseModel):
@@ -49,3 +51,8 @@ class IssueBase(IssueIn):
 
     class Config:
         orm_mode = True
+
+
+class Login(BaseModel):
+    username: str
+    password: str

@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..hashing import PassHash
+from ..hashing import Hash
 from ..models import User
 from ..schemas import ShowUser, UserIn
 
@@ -18,7 +18,7 @@ async def createUser(request: UserIn, db: Session = Depends(get_db)):
     newuser = User(
         username=request.username,
         email=request.email,
-        password=PassHash.hash(request.password),
+        password=Hash(request.password),
     )
     db.add(newuser)
     db.commit()

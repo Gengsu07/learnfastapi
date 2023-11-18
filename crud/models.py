@@ -12,7 +12,7 @@ class Issue(Base):
     title = Column(String)
     description = Column(String)
     createdAt = Column(DateTime, default=datetime.now())
-    user_id = Column(Integer, ForeignKey("user.id"))
+    user_id: int = Column(Integer, ForeignKey("user.id"), nullable=False)
     user = relationship("User", back_populates="issues")
 
 

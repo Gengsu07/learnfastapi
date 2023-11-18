@@ -9,8 +9,5 @@ from .routers.userAPI import router as UserRouter
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Gengsu Tracker Issue")
-app.include_router(
-    IssueRouter,
-    tags=["Issue"],
-)
-app.include_router(UserRouter, tags=["User"])
+app.include_router(IssueRouter)
+app.include_router(UserRouter)

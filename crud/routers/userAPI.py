@@ -8,10 +8,10 @@ from ..hashing import PassHash
 from ..models import User
 from ..schemas import ShowUser, UserIn
 
-router = APIRouter()
+router = APIRouter(prefix="/user", tags=["User"])
 
 
-@router.post("/user", status_code=201, response_model=ShowUser)
+@router.post("/", status_code=201, response_model=ShowUser)
 async def create_user(request: UserIn, db: Session = Depends(get_db)):
     cekusername = db.query(User).filter(User.username == request.username).first()
     if cekusername:
@@ -31,13 +31,13 @@ async def create_user(request: UserIn, db: Session = Depends(get_db)):
     return newuser
 
 
-@router.get("/user", status_code=200, response_model=List[ShowUser])
+@router.get("/", status_code=200, response_model=List[ShowUser])
 async def get_users(db: Session = Depends(get_db)):
     stmt = db.query(User).all()
     return [ShowUser.from_orm(x) for x in stmt]
 
 
-@router.get("/user/{userid}", status_code=200, response_model=ShowUser)
+@router.get("/{userid}", status_code=200, response_model=ShowUser)
 async def get_user(userid: int, db: Session = Depends(get_db)):
     stmt = db.query(User).filter(User.id == userid).first()
     if not stmt:
@@ -47,7 +47,7 @@ async def get_user(userid: int, db: Session = Depends(get_db)):
     return ShowUser.from_orm(stmt)
 
 
-@router.delete("/user/{userid}", status_code=204)
+@router.delete("/{userid}", status_code=204)
 async def del_user(userid: int, db: Session = Depends(get_db)):
     stmt = db.query(User).filter(User.id == userid).first()
     if not stmt:

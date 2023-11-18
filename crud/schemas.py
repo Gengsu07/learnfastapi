@@ -20,11 +20,12 @@ class UserIn(BaseModel):
 
 class UserBase(UserIn):
     id: int
+    user_id: int
     createdAt: Optional[datetime]
 
 
 class UserMini(BaseModel):
-    id: str
+    id: int
     username: str
     email: str
 

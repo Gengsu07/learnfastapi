@@ -8,16 +8,16 @@ from ..database import get_db
 from ..models import Issue
 from ..schemas import IssueBase, IssueIn
 
-router = APIRouter()
+router = APIRouter(tags=["Issue"], prefix="/issue")
 
 
-@router.get("/issues", status_code=200, response_model=List[IssueBase])
+@router.get("/", status_code=200, response_model=List[IssueBase])
 async def get_issues(db: Session = Depends(get_db)):
     stmt = db.query(Issue).all()
     return [IssueBase.from_orm(x) for x in stmt]
 
 
-@router.get("/issue/{issueid}", status_code=200, response_model=IssueBase)
+@router.get("/{issueid}", status_code=200, response_model=IssueBase)
 async def get_issue(issueid: int, db: Session = Depends(get_db)):
     stmt = db.query(Issue).filter(Issue.id == issueid).first()
     if not stmt:
@@ -27,9 +27,9 @@ async def get_issue(issueid: int, db: Session = Depends(get_db)):
     return IssueBase.from_orm(stmt)
 
 
-@router.post("/issue", status_code=201, response_model=IssueBase)
+@router.post("/", status_code=201, response_model=IssueBase)
 async def create_issue(issue: IssueIn, db: Session = Depends(get_db)):
-    newissue = Issue(title=issue.title, description=issue.description)
+    newissue = Issue(title=issue.title, description=issue.description, user_id=2)
 
     db.add(newissue)
     db.commit()
@@ -38,7 +38,7 @@ async def create_issue(issue: IssueIn, db: Session = Depends(get_db)):
     return newissue
 
 
-@router.delete("/issue/{issueid}", status_code=204)
+@router.delete("/{issueid}", status_code=204)
 async def del_issue(issueid: int, db: Session = Depends(get_db)):
     stmt = db.query(Issue).filter(Issue.id == issueid).first()
     if not stmt:
@@ -52,7 +52,7 @@ async def del_issue(issueid: int, db: Session = Depends(get_db)):
     return {"Detail": f"Data with id:{issueid} has been deleted"}
 
 
-@router.put("/issue/{issueid}", status_code=202)
+@router.put("/{issueid}", status_code=202)
 async def update_issue(issueid: int, request: IssueIn, db: Session = Depends(get_db)):
     stmt = db.query(Issue).filter(Issue.id == issueid).first()
     if not stmt:

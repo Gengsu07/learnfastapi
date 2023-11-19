@@ -4,12 +4,13 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..hashing import Verify
 from ..models import User
-from ..schemas import Login, UserBase
+from ..schemas import Login, Token
+from ..token import create_access_token
 
 router = APIRouter(tags=["Authentication"])
 
 
-@router.post("/login", status_code=202, response_model=UserBase)
+@router.post("/login", status_code=202, response_model=Token)
 def Login(request: Login, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == request.username).first()
     if not user:
@@ -23,4 +24,5 @@ def Login(request: Login, db: Session = Depends(get_db)):
             status_code=401,
             detail="invalid credentials",
         )
-    return user
+    access_token = create_access_token(data={"sub": user.email})
+    return {"access_token": access_token, "token_type": "bearer"}
